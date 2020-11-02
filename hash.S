@@ -1,68 +1,74 @@
 hash_more.S
 
-funcion no hoja 
-
+# funcion no hoja 
 
 STRING_HASH_INIT .equ 1
-TRING_HASH_MORE  .equ 2
+STRING_HASH_MORE  .equ 2
+STRING_HASH_DONE .equ 3
 HASH_NUMBER .equ 1000003
 
-	20 	  ra
-sra 16	  fp	
-	12	  padding
-	8	  a2	#  len 
-	4	  a1 	# *str
-aba	0 	  a0 	# *sh
+# FORMA DE DISTRIBUCION DEL STACK FRAME
 
+#	20 	  ra
+#	16	  fp	
+# sra
 
-subu	sp, sp, 24
-sw		fp, 16(sp)
-sw		ra, 24(sp)
-move	fp, sp
+#	12	  padding
+#	8	  a2		len 
+#	4	  a1 		*str
+# 	0 	  a0 		*sh
+# aba
 
-sw		a2, 8(sp)
-sw		a1, 4(sp)
-sw		a0, 0(sp)
+subu	sp, sp, 24	# Movemos el Stack Pointer en 24 bytes hacia abajo (Crece)
+sw		fp, 16(sp)	# Guardamos el frame pointer en sp+16
+sw		ra, 24(sp)	# Guardamos el return adress en sp+24
+move	fp, sp		# Movemos el frame pointer a donde apunta el stack pointer
+
+sw		a2, 8(sp)	# Almacenamos a2 en sp+8
+sw		a1, 4(sp)	# Almacenamos a1 en sp+4
+sw		a0, 0(sp)	# Almacenamos a0 en sp+0
 
 # Fin del stack
 
-move t0, a0	  # len
-move t1, a1	  #*str
-move t2, a2   #*sh 
+move t0, a0	# Cargamos len a t0
+move t1, a1	# Cargamos *str a t1
+move t2, a2	# Cargamos *sh  a t2
 
-lb t3, 0(t2) #load byte	lw load word 32 lh sh->flag
-lw t4, 4(t2) # sh->hash
-lw t5, 8(t2) # sh->size 
+lb t3, 0(t2) 	# Cargamos en t3 el byte de t2; es decir, el primer campo de sh. (h->flag)
+lw t4, 4(t2) 	# Cargamos en t4 el segundo campo del sh. (h->hash)
+lw t5, 8(t2) 	# Cargamos en t5 el tercer campo del sh. (h->size)
 
-bnq t3, STRING_HASH_INIT, assert1
-bnq t3, STRING_HASH_MORE, assert2
+bne t3, STRING_HASH_INIT, assert1	# Si h->flag es hash_init, ir al assert 1
+bne t3, STRING_HASH_MORE, assert2	# Si h->flag es hash_more, chequear el assert 2 
 
 
-bnq t3, STRING_HASH_INIT, while
+bne t3, STRING_HASH_INIT, while		# Si h->flag es INIT, ingresar al while
 
-sb  t2, STRING_HASH_MORE 	#sh->flag = STRING_HASH_MORE;
+sb  t2, STRING_HASH_MORE 	# sh->flag = STRING_HASH_MORE;
 
-move t6, t1 
-sll t6, t6, 7
-sw t4, t6	#sh->hash = (*str) << 7;
+move t6, t1		# Movemos t6 a t1
+sll t6, t6, 7	# Multiplicamos t6 por 14 (7 posiciones en sll)
+sw t4, t6		# sh->hash = (*str) << 7
 
 while: 
 
-	lb t7, 0(t1)  #*str
+	lb t7, 0(t1)	# Cargamos *str en t7
 
-	beq t7, 0, end 
-	beq t0, 0, end
+	beq t7, 0, end 	# Si *str=0, finalizar
+	beq t0, 0, end	# Si len = 0, finalizar
 
-	subu t0, t0, 1
-	mult t8, t4, HASH_NUMBER
-	xor t8, t8, t1
-	sw t4, t8 
+	# Si no se cumple ninguna de las condiciones:
 
-	addiu t1, 1(t1) #ver esto.  puntero, puntero str
+	subu t0, t0, 1				# len = len-1
+	mult t8, t4, HASH_NUMBER	# t8 = hash * HASH_NUMBER
+	xor t8, t8, t1				# t8 = t8 XOR *str
+	sw t4, t8 					# Guardamos t8 en t4 (Nuevo valor del hash en t4).
 
-	addiu t5, 1(t5) #sh->size++;
+	addiu t1, 1(t1) # ver esto.  puntero, puntero str (Sumamos 1 al *str)
 
-	b while 
+	addiu t5, 1(t5) # sh->size++
+
+	b while # Retornamos al bucle
 
 
 
@@ -71,10 +77,10 @@ assert1:
 assert2:  
 
 end:
-	lw		fp, 16(sp)
-	lw		ra, 24(sp)
-	addi	sp, sp, 24
-	jr ra
+	lw		fp, 16(sp)	# Cargamos el anterior frame pointer en el frame pointer
+	lw		ra, 24(sp)	# Cargamos el return adress anterior al return adress
+	addi	sp, sp, 24	# Corremos el stack pointer en 24 bytes positivos
+	jr ra				# Jump and link al return adress
 
 
 
