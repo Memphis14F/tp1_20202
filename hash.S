@@ -38,11 +38,11 @@ lb t3, 0(t2) 	# Cargamos en t3 el byte de t2; es decir, el primer campo de sh. (
 lw t4, 4(t2) 	# Cargamos en t4 el segundo campo del sh. (h->hash)
 lw t5, 8(t2) 	# Cargamos en t5 el tercer campo del sh. (h->size)
 
-bne t3, STRING_HASH_INIT, assert1	# Si h->flag es hash_init, ir al assert 1
-bne t3, STRING_HASH_MORE, assert2	# Si h->flag es hash_more, chequear el assert 2 
+bne t3, STRING_HASH_INIT, assert	# Si h->flag no es hash_init, ir al assert 1
 
+post_assertion: 
 
-bne t3, STRING_HASH_INIT, while		# Si h->flag es INIT, ingresar al while
+	bne t3, STRING_HASH_INIT, while		# Si h->flag no es INIT, ingresar al while
 
 sb  t2, STRING_HASH_MORE 	# sh->flag = STRING_HASH_MORE;
 
@@ -72,9 +72,9 @@ while:
 
 
 
-assert1:
-
-assert2:  
+assert:
+	beq t3, STRING_HASH_MORE, post_assertion	# Si h->flag es hash_more, continuar en post_assertion
+	# Lanzar Error por no cumplir assert
 
 end:
 	lw		fp, 16(sp)	# Cargamos el anterior frame pointer en el frame pointer
