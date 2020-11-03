@@ -1,9 +1,9 @@
-hash_more.S
+#hash_more.S
 
 # funcion no hoja 
 
 STRING_HASH_INIT .equ 1
-STRING_HASH_MORE  .equ 2
+STRING_HASH_MORE .equ 2
 STRING_HASH_DONE .equ 3
 HASH_NUMBER .equ 1000003
 
@@ -21,7 +21,7 @@ HASH_NUMBER .equ 1000003
 
 subu	sp, sp, 24	# Movemos el Stack Pointer en 24 bytes hacia abajo (Crece)
 sw		fp, 16(sp)	# Guardamos el frame pointer en sp+16
-sw		ra, 24(sp)	# Guardamos el return adress en sp+24
+sw		ra, 20(sp)	# Guardamos el return adress en sp+20
 move	fp, sp		# Movemos el frame pointer a donde apunta el stack pointer
 
 sw		a2, 8(sp)	# Almacenamos a2 en sp+8
