@@ -70,9 +70,9 @@ string_hash_more:
 	sb t3, 0(t0)	# Guardamos el flag en el registro de C.
 
 	lb t7, 0(t1)	# Cargamos *str en t7
-	move t6, t7		# Movemos t6 a t7
-	sll t6, t6, 7	# Multiplicamos t6 por 2^7 (7 posiciones en sll)
-	move t4, t6		# sh->hash = (*str) << 7
+	# move t6, t7		# Movemos t6 a t7
+	sll t7, t7, 7	# Multiplicamos t6 por 2^7 (7 posiciones en sll)
+	move t4, t7		# sh->hash = (*str) << 7
 	sw t4, 4(t0)	# Guardamos el hash en el registro de C.
 
 	while: 
@@ -85,10 +85,10 @@ string_hash_more:
 
 		subu t2, t2, 1				# len = len-1
 		li t8, 1000003				# Cargo el inmediato en t8 para poder multiplicar.
-		mul t8, t8, t4				# $LO = hash * HASH_NUMBER
+		mul t8, t8, t4				# t8 = hash * HASH_NUMBER
 		# mflo t8					# Cargo el resultado de la multiplicación (t8 = LO)
+		xor t8, t8, t7				# t8 = t8 XOR *str
 		addiu t1, t1, 1 # ver esto.  puntero, puntero str (Sumamos 1 al *str)
-		xor t8, t8, t1				# t8 = t8 XOR *str
 		move t4, t8 				# Guardamos t8 en t4 (Nuevo valor del hash en t4).
 		sw t4, 4(t0)				# Guardamos el hash en el registro de C.
 
