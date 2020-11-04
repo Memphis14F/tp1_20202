@@ -87,11 +87,12 @@ string_hash_more:
 		li t8, 1000003				# Cargo el inmediato en t8 para poder multiplicar.
 		mul t8, t8, t4				# $LO = hash * HASH_NUMBER
 		# mflo t8					# Cargo el resultado de la multiplicación (t8 = LO)
+		addiu t1, t1, 1 # ver esto.  puntero, puntero str (Sumamos 1 al *str)
 		xor t8, t8, t1				# t8 = t8 XOR *str
 		move t4, t8 				# Guardamos t8 en t4 (Nuevo valor del hash en t4).
 		sw t4, 4(t0)				# Guardamos el hash en el registro de C.
 
-		addiu t1, t1, 1 # ver esto.  puntero, puntero str (Sumamos 1 al *str)
+		
 
 		addiu t5, t5, 1 # sh->size++
 		sw t5, 8(t0) 	# Guardamos el size en el registro de C.
