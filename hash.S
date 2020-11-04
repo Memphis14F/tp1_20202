@@ -1,3 +1,4 @@
+
 # Id: hash.S
 #include <sys/regdef.h>
 #include <sys/syscall.h>
@@ -7,10 +8,12 @@
 .abicalls
 .align 2 
 
-STRING_HASH_INIT equ 1
-STRING_HASH_MORE equ 2
-STRING_HASH_DONE equ 3
-HASH_NUMBER equ 1000003
+/*
+STRING_HASH_INIT 1
+STRING_HASH_MORE EQU 2
+STRING_HASH_DONE EQU 3
+HASH_NUMBER EQU 1000003
+*/
 
 # FORMA DE DISTRIBUCION DEL STACK FraME
 
@@ -50,17 +53,17 @@ hash_more:
 	lw t4, 4(t2) 	# Cargamos en t4 el segundo campo del sh. (h->hash)
 	lw t5, 8(t2) 	# Cargamos en t5 el tercer campo del sh. (h->size)
 
-	bne t3, STRING_HASH_INIT, assert	# Si h->flag no es hash_init, ir al assert 1
+	bne t3, 1, assert	# Si h->flag no es hash_init, ir al assert 1
 
 	post_assertion: 
 
-		bne t3, STRING_HASH_INIT, while		# Si h->flag no es INIT, ingresar al while
+		bne t3, 1, while		# Si h->flag no es INIT, ingresar al while
 
-	sb  t2, STRING_HASH_MORE 	# sh->flag = STRING_HASH_MORE;
+	sb  t2, 2 	# sh->flag = STRING_HASH_MORE;
 
 	move t6, t1		# Movemos t6 a t1
 	sll t6, t6, 7	# Multiplicamos t6 por 14 (7 posiciones en sll)
-	sw t4, t6		# sh->hash = (*str) << 7
+	sw t4, 0(t6)	# sh->hash = (*str) << 7
 
 	while: 
 
@@ -72,20 +75,22 @@ hash_more:
 		# Si no se cumple ninguna de las condiciones:
 
 		subu t0, t0, 1				# len = len-1
-		mult t8, t4, HASH_NUMBER	# t8 = hash * HASH_NUMBER
+		li t8, 1000003				# Cargo el inmediato en t8 para poder multiplicar.
+		mult t8, t4					# $LO = hash * HASH_NUMBER
+		mflo t8						# Cargo el resultado de la multiplicación (t8 = LO)
 		xor t8, t8, t1				# t8 = t8 XOR *str
-		sw t4, t8 					# Guardamos t8 en t4 (Nuevo valor del hash en t4).
+		sw t4, 0(t8) 				# Guardamos t8 en t4 (Nuevo valor del hash en t4).
 
-		addiu t1, 1(t1) # ver esto.  puntero, puntero str (Sumamos 1 al *str)
+		addiu t1, t1, 1 # ver esto.  puntero, puntero str (Sumamos 1 al *str)
 
-		addiu t5, 1(t5) # sh->size++
+		addiu t5, t5, 1 # sh->size++
 
 		b while # Retornamos al bucle
 
 
 
 		assert:
-			beq t3, STRING_HASH_MORE, post_assertion	# Si h->flag es hash_more, continuar en post_assertion
+			beq t3, 2, post_assertion	# Si h->flag es hash_more, continuar en post_assertion
 			# Lanzar Error por no cumplir assert
 
 		end:
@@ -94,7 +99,4 @@ hash_more:
 			addi	sp, sp, 24	# Corremos el stack pointer en 24 bytes positivos
 			jr ra				# Jump and link al return adress
 
-
-
-
-
+.end
