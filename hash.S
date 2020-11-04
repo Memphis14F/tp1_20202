@@ -24,10 +24,13 @@ HASH_NUMBER EQU 1000003
 # aba
 
 
-.text
+
+
 .rdata
 .abicalls
 .align 2 
+
+.text
 .globl string_hash_more
 .ent string_hash_more
 
@@ -102,4 +105,4 @@ string_hash_more:
 			addi	sp, sp, 24	# Corremos el stack pointer en 24 bytes positivos
 			jr ra				# Jump and link al return adress
 
-.end
+.end string_hash_more
