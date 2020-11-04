@@ -26,11 +26,10 @@ HASH_NUMBER EQU 1000003
 
 
 
-.rdata
+# .rdata
 .abicalls
-.align 2 
-
 .text
+.align 2 
 .globl string_hash_more
 .ent string_hash_more
 
@@ -51,13 +50,13 @@ string_hash_more:
 
 	# Fin del stack
 
-	move t0, a0	# Cargamos len a t0
+	move t0, a0	# Cargamos *sh a t0
 	move t1, a1	# Cargamos *str a t1
-	move t2, a2	# Cargamos *sh  a t2
+	move t2, a2	# Cargamos len  a t2
 
-	lb t3, 0(t2) 	# Cargamos en t3 el byte de t2; es decir, el primer campo de sh. (h->flag)
-	lw t4, 4(t2) 	# Cargamos en t4 el segundo campo del sh. (h->hash)
-	lw t5, 8(t2) 	# Cargamos en t5 el tercer campo del sh. (h->size)
+	lb t3, 0(t0) 	# Cargamos en t3 el byte de t2; es decir, el primer campo de sh. (h->flag)
+	lw t4, 4(t0) 	# Cargamos en t4 el segundo campo del sh. (h->hash)
+	lw t5, 8(t0) 	# Cargamos en t5 el tercer campo del sh. (h->size)
 
 	bne t3, 1, assert	# Si h->flag no es hash_init, ir al assert 1
 
@@ -65,31 +64,37 @@ string_hash_more:
 
 		bne t3, 1, while		# Si h->flag no es INIT, ingresar al while
 
-	sb  t2, 2 	# sh->flag = STRING_HASH_MORE;
+	# HASTA ACA FUNCIONA
 
-	move t6, t1		# Movemos t6 a t1
-	sll t6, t6, 7	# Multiplicamos t6 por 14 (7 posiciones en sll)
-	sw t4, 0(t6)	# sh->hash = (*str) << 7
+	li  t3, 2 		# sh->flag = STRING_HASH_MORE;
+	sb t3, 0(t0)	# Guardamos el flag en el registro de C.
+
+	lb t7, 0(t1)	# Cargamos *str en t7
+	move t6, t7		# Movemos t6 a t7
+	sll t6, t6, 7	# Multiplicamos t6 por 2^7 (7 posiciones en sll)
+	move t4, t6		# sh->hash = (*str) << 7
+	sw t4, 4(t0)	# Guardamos el hash en el registro de C.
 
 	while: 
-
 		lb t7, 0(t1)	# Cargamos *str en t7
 
 		beq t7, 0, end 	# Si *str=0, finalizar
-		beq t0, 0, end	# Si len = 0, finalizar
+		beq t2, 0, end	# Si len = 0, finalizar
 
 		# Si no se cumple ninguna de las condiciones:
 
-		subu t0, t0, 1				# len = len-1
+		subu t2, t2, 1				# len = len-1
 		li t8, 1000003				# Cargo el inmediato en t8 para poder multiplicar.
-		mult t8, t4					# $LO = hash * HASH_NUMBER
-		mflo t8						# Cargo el resultado de la multiplicación (t8 = LO)
+		mul t8, t8, t4				# $LO = hash * HASH_NUMBER
+		# mflo t8					# Cargo el resultado de la multiplicación (t8 = LO)
 		xor t8, t8, t1				# t8 = t8 XOR *str
-		sw t4, 0(t8) 				# Guardamos t8 en t4 (Nuevo valor del hash en t4).
+		move t4, t8 				# Guardamos t8 en t4 (Nuevo valor del hash en t4).
+		sw t4, 4(t0)				# Guardamos el hash en el registro de C.
 
 		addiu t1, t1, 1 # ver esto.  puntero, puntero str (Sumamos 1 al *str)
 
 		addiu t5, t5, 1 # sh->size++
+		sw t5, 8(t0) 	# Guardamos el size en el registro de C.
 
 		b while # Retornamos al bucle
 
