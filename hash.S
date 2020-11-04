@@ -69,27 +69,27 @@ string_hash_more:
 	li  t3, 2 		# sh->flag = STRING_HASH_MORE;
 	sb t3, 0(t0)	# Guardamos el flag en el registro de C.
 
-	lb t7, 0(t1)	# Cargamos *str en t7
+	lb t6, 0(t1)	# Cargamos *str en t6
 	# move t6, t7		# Movemos t6 a t7
-	sll t7, t7, 7	# Multiplicamos t6 por 2^7 (7 posiciones en sll)
-	move t4, t7		# sh->hash = (*str) << 7
+	sll t6, t6, 7	# Multiplicamos t6 por 2^7 (7 posiciones en sll)
+	move t4, t6		# sh->hash = (*str) << 7
 	sw t4, 4(t0)	# Guardamos el hash en el registro de C.
 
 	while: 
-		lb t7, 0(t1)	# Cargamos *str en t7
+		lb t6, 0(t1)	# Cargamos *str en t6
 
-		beq t7, 0, end 	# Si *str=0, finalizar
+		beq t6, 0, end 	# Si *str=0, finalizar
 		beq t2, 0, end	# Si len = 0, finalizar
 
 		# Si no se cumple ninguna de las condiciones:
 
 		subu t2, t2, 1				# len = len-1
-		li t8, 1000003				# Cargo el inmediato en t8 para poder multiplicar.
-		mul t8, t8, t4				# t8 = hash * HASH_NUMBER
+		li t7, 1000003				# Cargo el inmediato en t7 para poder multiplicar.
+		mul t7, t7, t4				# t7 = hash * HASH_NUMBER
 		# mflo t8					# Cargo el resultado de la multiplicación (t8 = LO)
-		xor t8, t8, t7				# t8 = t8 XOR *str
+		xor t7, t7, t6				# t7 = t7 XOR *str
 		addiu t1, t1, 1 # ver esto.  puntero, puntero str (Sumamos 1 al *str)
-		move t4, t8 				# Guardamos t8 en t4 (Nuevo valor del hash en t4).
+		move t4, t7 				# Guardamos t7 en t4 (Nuevo valor del hash en t4).
 		sw t4, 4(t0)				# Guardamos el hash en el registro de C.
 
 		
