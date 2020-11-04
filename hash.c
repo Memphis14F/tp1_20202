@@ -11,7 +11,7 @@ string_hash_init(string_hash *h)
 	h->size = 0;
 }
 
-
+/*
 void
 string_hash_more(string_hash *sh, char *str, size_t len)
 {
@@ -27,6 +27,9 @@ string_hash_more(string_hash *sh, char *str, size_t len)
 		sh->size++;
 	}
 }
+*/
+
+extern void string_hash_more(string_hash *sh, char *str, size_t len);
 
 void
 string_hash_done(string_hash *sh)

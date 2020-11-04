@@ -1,12 +1,8 @@
-
 # Id: hash.S
+
 #include <sys/regdef.h>
 #include <sys/syscall.h>
 
-.text
-.rdata
-.abicalls
-.align 2 
 
 /*
 STRING_HASH_INIT 1
@@ -26,9 +22,16 @@ HASH_NUMBER EQU 1000003
 #	4	  a1 		*str
 # 	0 	  a0 		*sh
 # aba
-.globl hash_more
-.ent hash_more
-hash_more:
+
+
+.text
+.rdata
+.abicalls
+.align 2 
+.globl string_hash_more
+.ent string_hash_more
+
+string_hash_more:
 	.frame fp, 24, ra
 	.set noreorder
 	.cpload t9
