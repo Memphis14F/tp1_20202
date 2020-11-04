@@ -34,14 +34,15 @@ HASH_NUMBER EQU 1000003
 .ent string_hash_more
 
 string_hash_more:
-	.frame fp, 24, ra
+	.frame fp, 32, ra
 	.set noreorder
 	.cpload t9
 	.set reorder
 
-	subu	sp, sp, 24	# Movemos el Stack Pointer en 24 bytes hacia abajo (Crece)
+	subu	sp, sp, 32	# Movemos el Stack Pointer en 32 bytes hacia abajo (Crece)
 	sw		fp, 16(sp)	# Guardamos el frame pointer en sp+16
 	sw		ra, 20(sp)	# Guardamos el return adress en sp+20
+	sw		gp, 24(sp)	# Guardamos el global pointer en sp+24
 	move	fp, sp		# Movemos el frame pointer a donde apunta el stack pointer
 
 	sw		a2, 8(sp)	# Almacenamos a2 en sp+8
@@ -108,7 +109,8 @@ string_hash_more:
 		end:
 			lw		fp, 16(sp)	# Cargamos el anterior frame pointer en el frame pointer
 			lw		ra, 20(sp)	# Cargamos el return adress anterior al return adress
-			addi	sp, sp, 24	# Corremos el stack pointer en 24 bytes positivos
+			lw		gp, 24(sp)	# Cargamos el global pointer anterior 
+			add     sp, sp, 32	# Corremos el stack pointer en 32 bytes positivos
 			jr ra				# Jump and link al return adress
 
 .end string_hash_more
