@@ -36,8 +36,8 @@ int
 main(int argc, char * const argv[])
 {
 	int cant_lineas = 0;
-	char** lines = read("input.txt", &cant_lineas);
-	//char** lines = read(argv[1]);
+	//char** lines = read("input.txt", &cant_lineas);
+	char** lines = read(argv[1], &cant_lineas);
 	for(int x=0; x < cant_lineas; x++){
     	printf("%s", lines[x]);
     }
