@@ -5,14 +5,15 @@
 
 
 /*
-STRING_HASH_INIT 1
-STRING_HASH_MORE EQU 2
-STRING_HASH_DONE EQU 3
-HASH_NUMBER EQU 1000003
+STRING_HASH_INIT: .equ 1
+STRING_HASH_MORE: .equ 2
+STRING_HASH_DONE: .equ 3
+HASH_NUMBER EQU: .equ 1000003
 */
 
 # FORMA DE DISTRIBUCION DEL STACK FraME
-
+#	28	  padding
+# 	24	  gp
 #	20 	  ra
 #	16	  fp	
 # sra
@@ -28,10 +29,19 @@ HASH_NUMBER EQU 1000003
 
 # .rdata
 .abicalls
-.text
+
 .align 2 
 .globl string_hash_more
 .ent string_hash_more
+
+string_error_pointer: .word error_string
+.size string_error_pointer, 4
+
+.align 0 
+error_string: .asciiz "Assert error.\n"
+
+.text
+.align 2 
 
 string_hash_more:
 	.frame fp, 32, ra
@@ -59,22 +69,18 @@ string_hash_more:
 	lw t4, 4(t0) 	# Cargamos en t4 el segundo campo del sh. (h->hash)
 	lw t5, 8(t0) 	# Cargamos en t5 el tercer campo del sh. (h->size)
 
-	bne t3, 1, assert	# Si h->flag no es hash_init, ir al assert 1
+	bne t3, 1, assert	# Si h->flag no es hash_init, ir al assert.
 
-	post_assertion: 
+post_assertion:
+	bne t3, 1, while	# Si h->flag no es INIT, ingresar al while
 
-		bne t3, 1, while		# Si h->flag no es INIT, ingresar al while
+	li  t3, 2 			# sh->flag = STRING_HASH_MORE;
+	sb t3, 0(t0)		# Guardamos el flag en el registro de C.
 
-	# HASTA ACA FUNCIONA
-
-	li  t3, 2 		# sh->flag = STRING_HASH_MORE;
-	sb t3, 0(t0)	# Guardamos el flag en el registro de C.
-
-	lb t6, 0(t1)	# Cargamos *str en t6
-	# move t6, t7		# Movemos t6 a t7
-	sll t6, t6, 7	# Multiplicamos t6 por 2^7 (7 posiciones en sll)
-	move t4, t6		# sh->hash = (*str) << 7
-	sw t4, 4(t0)	# Guardamos el hash en el registro de C.
+	lb t6, 0(t1)		# Cargamos *str en t6
+	sll t6, t6, 7		# Multiplicamos t6 por 2^7 (7 posiciones en sll)
+	move t4, t6			# sh->hash = (*str) << 7
+	sw t4, 4(t0)		# Guardamos el hash en el registro de C.
 
 	while: 
 		lb t6, 0(t1)	# Cargamos *str en t6
@@ -87,7 +93,6 @@ string_hash_more:
 		subu t2, t2, 1				# len = len-1
 		li t7, 1000003				# Cargo el inmediato en t7 para poder multiplicar.
 		mul t7, t7, t4				# t7 = hash * HASH_NUMBER
-		# mflo t8					# Cargo el resultado de la multiplicación (t8 = LO)
 		xor t7, t7, t6				# t7 = t7 XOR *str
 		addiu t1, t1, 1 # ver esto.  puntero, puntero str (Sumamos 1 al *str)
 		move t4, t7 				# Guardamos t7 en t4 (Nuevo valor del hash en t4).
@@ -104,7 +109,14 @@ string_hash_more:
 
 		assert:
 			beq t3, 2, post_assertion	# Si h->flag es hash_more, continuar en post_assertion
-			# Lanzar Error por no cumplir assert
+
+			# ERROR POR NO CUMPLIR ASSERT
+			li a0, error_string			# Cargar el mensaje de error en el registro a0.
+			li v0, SYS_write			# Lanzar Error por no cumplir assert (SysPrint).
+			syscall						# Ejecutar el printeo de a0.
+			# EXIT Post Informe de Error
+			li v0, SYS_exit				# Cargar SysExit.
+			syscall						# Ejecutar Sys Exit.
 
 		end:
 			lw		fp, 16(sp)	# Cargamos el anterior frame pointer en el frame pointer

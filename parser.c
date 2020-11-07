@@ -1,10 +1,4 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include "hash.h"
-
-
-char** read(char* file, int* cant_lineas) {
+char** read_lines(char* file, int* cant_lineas) {
     FILE *fp = fopen(file, "r");
     if(fp == NULL) {
         perror("Unable to open file!");
@@ -32,18 +26,58 @@ void destruir_lineas(char** lines, int cantidad_lineas){
 	free(lines);
 }
 
-int
-main(int argc, char * const argv[])
-{
-	int cant_lineas = 0;
-	//char** lines = read("input.txt", &cant_lineas);
-	char** lines = read(argv[1], &cant_lineas);
-	for(int x=0; x < cant_lineas; x++){
-    	printf("%s", lines[x]);
-    }
-	//string_hash_more();
+void hash_input(char* input_file, char ***lines, int* cant_lineas){
+	(*lines) = read_lines(input_file, cant_lineas);
+}
+
+void output_hash(const char* output_file, char **lines, int cant_lineas){
+	for(int i=0; i < cant_lineas; i++){
+		printf("%s", lines[i]);
+	}
 	destruir_lineas(lines, cant_lineas);
-	return 0;
+}
+
+void parseAnswer(int argc, const char** argv) {
+	int option;
+	int cIndex = 0;
+	char** lines;
+	int cant_lineas = 0;
+
+	static struct option long_answer[] = {
+		{"version", no_argument,       NULL, 'V'},
+		{"help",    no_argument,       NULL, 'h'},
+		{"input",   required_argument, NULL, 'i'},
+		{"output",  required_argument, NULL, 'o'},
+	};
+	
+	while ((option = getopt_long(argc, (char**)argv, "Vhi:o:",long_answer ,&cIndex)) != -1){
+
+		if (option == -1)
+			break;
+
+		switch (option) {
+			case 'V':
+				printf("Version actual: 1.");
+				exit(0);
+
+			case 'h':
+				printf("Usage: \ntp1 -h\ntp1 -v\ntp1 -i in_file -o out_file\nOptions:\n-V, --version Print version and quit.\n-h, --help Print this information and quit.\n");
+				printf("-i, --input Specify input stream/file, '-' for stdin.\n-o, --output Specify output stream/file, '-' for stdout.");
+				exit(0);
+
+			case 'i':
+				hash_input(optarg, &lines, &cant_lineas);
+				break;
+
+			case 'o':
+				output_hash(optarg, lines, cant_lineas);
+				break;
+
+			default:
+				printf("Comando invalido. Pruebe utilizando tp1 -h.");
+				abort();
+		}
+	}
 }
 
 
