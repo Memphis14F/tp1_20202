@@ -34,9 +34,6 @@ HASH_NUMBER EQU: .equ 1000003
 .globl string_hash_more
 .ent string_hash_more
 
-string_error_pointer: .word error_string
-.size string_error_pointer, 4
-
 .align 0 
 error_string: .asciiz "Assert error.\n"
 
@@ -111,7 +108,9 @@ post_assertion:
 			beq t3, 2, post_assertion	# Si h->flag es hash_more, continuar en post_assertion
 
 			# ERROR POR NO CUMPLIR ASSERT
-			li a0, error_string			# Cargar el mensaje de error en el registro a0.
+			li a0, 2					# Cargamos stderr como fd: a0 = 2.
+			la a1, error_string			# Cargar el mensaje de error en el registro a1.
+			li a2, 15					# Asignamos la cantidad de caracteres: a2 = 15.
 			li v0, SYS_write			# Lanzar Error por no cumplir assert (SysPrint).
 			syscall						# Ejecutar el printeo de a0.
 			# EXIT Post Informe de Error

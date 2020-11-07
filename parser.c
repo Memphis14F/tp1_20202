@@ -1,3 +1,10 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
+#include <getopt.h>
+#include "hash.h"
+
 char** read_lines(char* file, int* cant_lineas) {
     FILE *fp = fopen(file, "r");
     if(fp == NULL) {
@@ -26,8 +33,95 @@ void destruir_lineas(char** lines, int cantidad_lineas){
 	free(lines);
 }
 
+/*
+int32_t get_hash_more(string_hash *str_hash, char * linea, size_t length, size_t stride){
+	size_t delta;
+	size_t rem = length;
+
+	string_hash_init(str_hash);
+
+	while (rem > 0) {
+		if (rem >= stride)
+			delta = stride;
+		else
+			delta = rem;
+	
+		string_hash_more(str_hash, linea, delta);
+		rem -= delta;
+		linea += delta;
+	}
+	string_hash_done(str_hash);
+
+	return string_hash_value(str_hash);
+}
+
+int get_hash(char* linea, int cant_lineas){
+	size_t length = strlen(linea);
+	string_hash str_hash;
+	int32_t valor_hash;
+
+	if (length > 1) {
+		valor_hash = get_hash_more(&str_hash, linea, length, length);
+
+		for (size_t i = length; i >= 1; i--) {
+			int32_t h = get_hash_more(&str_hash, linea, length, i);
+			assert(valor_hash == h);
+		}
+	}
+
+	return valor_hash;
+}
+*/
+
+int32_t get_hash_(string_hash *sh, char *msg, size_t len, size_t stride)
+{
+	char *ptr = msg;
+	size_t delta;
+	size_t rem;
+
+	string_hash_init(sh);
+	for (rem = len; rem > 0; ) {
+		if (rem >= stride)
+			delta = stride;
+		else
+			delta = rem;
+	
+		string_hash_more(sh, ptr, delta);
+		rem -= delta;
+		ptr += delta;
+	}
+	string_hash_done(sh);
+
+	return string_hash_value(sh);
+}
+
+int get_hash(char *msg)
+{
+	size_t len = strlen(msg);
+	size_t stride;
+	string_hash sh;
+	int32_t h0;
+	int32_t h;
+
+	if (len > 1) {
+		h0 = get_hash_(&sh, msg, len, len);
+
+		for (stride = len; stride >= 1; stride--) {
+			h = get_hash_(&sh, msg, len, stride);
+			assert(h0 == h);
+		}
+	}
+
+	return h0;
+}
+
 void hash_input(char* input_file, char ***lines, int* cant_lineas){
+	int* hashes = malloc(sizeof(int*)*(size_t)(*cant_lineas));
 	(*lines) = read_lines(input_file, cant_lineas);
+	for (int i=0; i<(*cant_lineas);i++){
+		hashes[i]=get_hash((*lines)[i]);
+		printf("%p\n", hashes[i]);
+	}
 }
 
 void output_hash(const char* output_file, char **lines, int cant_lineas){
@@ -40,7 +134,7 @@ void output_hash(const char* output_file, char **lines, int cant_lineas){
 void parseAnswer(int argc, const char** argv) {
 	int option;
 	int cIndex = 0;
-	char** lines;
+	char** lines = NULL;
 	int cant_lineas = 0;
 
 	static struct option long_answer[] = {

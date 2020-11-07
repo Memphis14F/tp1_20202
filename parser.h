@@ -7,7 +7,6 @@
 #include <string.h>
 #include <getopt.h>
 #include "hash.h"
-#include <files.h>
 
 char** read_lines(char* file, int* cant_lineas);
 void destruir_lineas(char** lines, int cantidad_lineas);
