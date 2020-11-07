@@ -3,6 +3,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <getopt.h>
+#include <stdint.h>
 #include "hash.h"
 
 char** read_lines(char* file, int* cant_lineas) {
@@ -31,6 +32,10 @@ void destruir_lineas(char** lines, int cantidad_lineas){
 	for (int i=0; i<cantidad_lineas; i++)
 		free(lines[i]);
 	free(lines);
+}
+
+void destruir_hashes(int* hashes){
+	free(hashes);
 }
 
 /*
@@ -115,25 +120,24 @@ int get_hash(char *msg)
 	return h0;
 }
 
-void hash_input(char* input_file, char ***lines, int* cant_lineas){
-	int* hashes = malloc(sizeof(int*)*(size_t)(*cant_lineas));
+void hash_input(char* input_file, char ***lines, int* cant_lineas, int32_t**hashes){
 	(*lines) = read_lines(input_file, cant_lineas);
+	(*hashes) = malloc(sizeof(int32_t*)*(size_t)(*cant_lineas));
 	for (int i=0; i<(*cant_lineas);i++){
-		hashes[i]=get_hash((*lines)[i]);
-		printf("%p\n", hashes[i]);
+		(*hashes)[i]=get_hash((*lines)[i]);
 	}
 }
 
-void output_hash(const char* output_file, char **lines, int cant_lineas){
+void output_hash(const char* output_file, char **lines, int cant_lineas, int32_t* hashes){
 	for(int i=0; i < cant_lineas; i++){
-		printf("%s", lines[i]);
+		printf ("0x%08x %s", hashes[i], lines[i]);
 	}
-	destruir_lineas(lines, cant_lineas);
 }
 
 void parseAnswer(int argc, const char** argv) {
 	int option;
 	int cIndex = 0;
+	int32_t* hashes = NULL;
 	char** lines = NULL;
 	int cant_lineas = 0;
 
@@ -160,11 +164,13 @@ void parseAnswer(int argc, const char** argv) {
 				exit(0);
 
 			case 'i':
-				hash_input(optarg, &lines, &cant_lineas);
+				hash_input(optarg, &lines, &cant_lineas, &hashes);
 				break;
 
 			case 'o':
-				output_hash(optarg, lines, cant_lineas);
+				output_hash(optarg, lines, cant_lineas, hashes);
+				destruir_lineas(lines, cant_lineas);
+				destruir_hashes(hashes);
 				break;
 
 			default:
