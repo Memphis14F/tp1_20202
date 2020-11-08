@@ -38,46 +38,6 @@ void destruir_hashes(int* hashes){
 	free(hashes);
 }
 
-/*
-int32_t get_hash_more(string_hash *str_hash, char * linea, size_t length, size_t stride){
-	size_t delta;
-	size_t rem = length;
-
-	string_hash_init(str_hash);
-
-	while (rem > 0) {
-		if (rem >= stride)
-			delta = stride;
-		else
-			delta = rem;
-	
-		string_hash_more(str_hash, linea, delta);
-		rem -= delta;
-		linea += delta;
-	}
-	string_hash_done(str_hash);
-
-	return string_hash_value(str_hash);
-}
-
-int get_hash(char* linea, int cant_lineas){
-	size_t length = strlen(linea);
-	string_hash str_hash;
-	int32_t valor_hash;
-
-	if (length > 1) {
-		valor_hash = get_hash_more(&str_hash, linea, length, length);
-
-		for (size_t i = length; i >= 1; i--) {
-			int32_t h = get_hash_more(&str_hash, linea, length, i);
-			assert(valor_hash == h);
-		}
-	}
-
-	return valor_hash;
-}
-*/
-
 int32_t get_hash_(string_hash *sh, char *msg, size_t len, size_t stride)
 {
 	char *ptr = msg;
@@ -129,8 +89,20 @@ void hash_input(char* input_file, char ***lines, int* cant_lineas, int32_t**hash
 }
 
 void output_hash(const char* output_file, char **lines, int cant_lineas, int32_t* hashes){
-	for(int i=0; i < cant_lineas; i++){
-		printf ("0x%08x %s", hashes[i], lines[i]);
+	FILE *fp = fopen(output_file, "w");
+    if(fp == NULL) {
+        perror("No se pudo leer el archivo. Imprimiendo el resultado por consola.");
+		for(int i=0; i < cant_lineas; i++){
+			printf ("0x%08x %s", hashes[i], lines[i]);
+		}
+		return;
+	}
+	else{
+		for(int i=0; i < cant_lineas; i++){
+			char mensaje [500];
+			sprintf (mensaje, "0x%08x %s", hashes[i], lines[i]);
+			fprintf(fp, mensaje);
+		}
 	}
 }
 

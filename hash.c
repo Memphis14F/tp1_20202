@@ -10,23 +10,7 @@ string_hash_init(string_hash *h)
 	h->hash = 0;
 	h->size = 0;
 }
-/*
-void
-string_hash_more(string_hash *sh, char *str, size_t len)
-{
-	assert(sh->flag == STRING_HASH_INIT || sh->flag == STRING_HASH_MORE);
 
-	if (sh->flag == STRING_HASH_INIT) {
-		sh->flag = STRING_HASH_MORE;
-		sh->hash = (*str) << 7;
-	}
-
-	while ((*str) != 0 && len--) {
-		sh->hash = (1000003 * sh->hash) ^ *str++;
-		sh->size++;
-	}
-}
-*/
 extern void string_hash_more(string_hash *sh, char *str, size_t len);
 
 void
@@ -67,3 +51,21 @@ static long string_hash(PyStringObject *a)
     return x;
 }
 #endif
+
+/*
+void
+string_hash_more(string_hash *sh, char *str, size_t len)
+{
+	assert(sh->flag == STRING_HASH_INIT || sh->flag == STRING_HASH_MORE);
+
+	if (sh->flag == STRING_HASH_INIT) {
+		sh->flag = STRING_HASH_MORE;
+		sh->hash = (*str) << 7;
+	}
+
+	while ((*str) != 0 && len--) {
+		sh->hash = (1000003 * sh->hash) ^ *str++;
+		sh->size++;
+	}
+}
+*/
