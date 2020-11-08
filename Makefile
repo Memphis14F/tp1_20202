@@ -1,13 +1,10 @@
 CFLAGS=-Wall -g
 
-all: regressions
+all: tp1
 	:
 
-regressions: regressions.c hash.c hash.S
-	$(CC) $(CFLAGS) -o regressions regressions.c hash.c hash.S
-
-test: regressions
-	./regressions
+tp1: main.c hash.c hash.S parser.c
+	$(CC) $(CFLAGS) -o tp1 main.c hash.c hash.S parser.c
 
 clean:
 	rm -f regressions
