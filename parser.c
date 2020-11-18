@@ -118,12 +118,12 @@ void std_input(char*** lines, int* cant_lineas){
 		if(aux == 'n' || aux == 'N')
 			break;
 		printf("\nIngrese una linea para hashear: ");
-		scanf ("%s", &buffer);
+		scanf ("%s", buffer);
 		(*lines) = realloc(lines, sizeof(char*)*((*cant_lineas)+1));
 		strcpy((*lines)[(*cant_lineas)], buffer);
 		(*cant_lineas)++;
 		printf ("\nQuiere ingresar una linea mas? S/N: ");
-		scanf("%c", aux);
+		scanf("%c", &aux);
 	}
 }
 
@@ -141,7 +141,6 @@ void parseAnswer(int argc, const char** argv) {
 	int32_t* hashes = NULL;
 	char** lines = NULL;
 	int cant_lineas = 0;
-	bool hubo_help_o_v = false;
 	bool hubo_input = false;
 	bool hubo_output = false;
 
@@ -169,26 +168,36 @@ void parseAnswer(int argc, const char** argv) {
 
 			case 'i':
 				hash_input(optarg, &lines, &cant_lineas, &hashes);
+				hubo_input = true;
 				break;
 
 			case 'o':
+				if (!hubo_input){
+					std_input(&lines, &cant_lineas);
+					hashes = malloc(sizeof(int32_t*)*(size_t)(cant_lineas));
+					for (int i=0; i<cant_lineas;i++){
+						hashes[i]=get_hash(lines[i]);
+					}
+				}
 				output_hash(optarg, lines, cant_lineas, hashes);
 				destruir_lineas(lines, cant_lineas);
 				destruir_hashes(hashes);
+				hubo_output=true;
 				break;
 
 			default:
-				if((!hubo_help_o_v) && (!hubo_input || !hubo_output)){
-					if(!hubo_input){
-						std_input(&lines, &cant_lineas);
-						hashes = malloc(sizeof(int32_t*)*(size_t)(cant_lineas));
-						for (int i=0; i<cant_lineas;i++){
-							hashes[i]=get_hash(lines[i]);
-						}
+				if((!hubo_input && !hubo_output)){
+					std_input(&lines, &cant_lineas);
+					hashes = malloc(sizeof(int32_t*)*(size_t)(cant_lineas));
+					for (int i=0; i<cant_lineas;i++){
+						hashes[i]=get_hash(lines[i]);
 					}
-					if(!hubo_output){
-						salida_std(lines, cant_lineas, hashes);
-					}
+					salida_std(lines, cant_lineas, hashes);
+					destruir_lineas(lines, cant_lineas);
+					destruir_hashes(hashes);
+				}
+				else if(!hubo_output){
+					salida_std(lines, cant_lineas, hashes);
 					destruir_lineas(lines, cant_lineas);
 					destruir_hashes(hashes);
 				}
