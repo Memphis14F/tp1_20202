@@ -17,6 +17,8 @@ void output_hash(const char* output_file, char **lines, int cant_lineas, int32_t
 void parseAnswer(int argc, const char** argv);
 int get_hash(char *msg);
 int32_t get_hash_(string_hash *sh, char *msg, size_t len, size_t stride);
+void salida_std(char** lines, int cant_lineas, int32_t* hashes);
+void std_input(char*** lines, int* cant_lineas);
 
 #endif /*PARSER_H*/
 
