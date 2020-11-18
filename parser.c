@@ -109,22 +109,24 @@ void output_hash(const char* output_file, char **lines, int cant_lineas, int32_t
 
 
 void std_input(char*** lines, int* cant_lineas){
-	char buffer[256];
+	char buffer[500];
 	char aux = 's';
 	printf ("\nQuiere ingresar una linea? S/N: ");
 	scanf("%c", &aux);
+	char** lineas;
 	while (aux != 'n' && aux != 'N'){
 		
 		if(aux == 'n' || aux == 'N')
 			break;
 		printf("\nIngrese una linea para hashear: ");
 		scanf ("%s", buffer);
-		(*lines) = realloc((*lines), sizeof(char*)*((*cant_lineas)+1));
-		strcpy((*lines)[(*cant_lineas)], buffer);
+		lineas = realloc(lineas, sizeof(char*)*((*cant_lineas)+1));
+		strcpy(lineas[(*cant_lineas)], buffer);
 		(*cant_lineas)++;
 		printf ("\nQuiere ingresar una linea mas? S/N: ");
 		scanf("%c", &aux);
 	}
+	(*lines) = lineas;
 }
 
 void salida_std(char** lines, int cant_lineas, int32_t* hashes){
