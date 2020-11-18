@@ -186,24 +186,25 @@ void parseAnswer(int argc, const char** argv) {
 				break;
 
 			default:
-				if((!hubo_input && !hubo_output)){
-					std_input(&lines, &cant_lineas);
-					hashes = malloc(sizeof(int32_t*)*(size_t)(cant_lineas));
-					for (int i=0; i<cant_lineas;i++){
-						hashes[i]=get_hash(lines[i]);
-					}
-					salida_std(lines, cant_lineas, hashes);
-					destruir_lineas(lines, cant_lineas);
-					destruir_hashes(hashes);
-				}
-				else if(!hubo_output){
-					salida_std(lines, cant_lineas, hashes);
-					destruir_lineas(lines, cant_lineas);
-					destruir_hashes(hashes);
-				}
+				printf("Comando inválido, pruebe con ./tp1 -h");
 				break;
 				
 		}
+	}
+	if((!hubo_input && !hubo_output)){
+		std_input(&lines, &cant_lineas);
+		hashes = malloc(sizeof(int32_t*)*(size_t)(cant_lineas));
+		for (int i=0; i<cant_lineas;i++){
+			hashes[i]=get_hash(lines[i]);
+		}
+		salida_std(lines, cant_lineas, hashes);
+		destruir_lineas(lines, cant_lineas);
+		destruir_hashes(hashes);
+	}
+	else if(!hubo_output){
+		salida_std(lines, cant_lineas, hashes);
+		destruir_lineas(lines, cant_lineas);
+		destruir_hashes(hashes);
 	}
 }
 
