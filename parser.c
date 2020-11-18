@@ -106,12 +106,43 @@ void output_hash(const char* output_file, char **lines, int cant_lineas, int32_t
 	}
 }
 
+
+void std_input(char*** lines, int* cant_lineas){
+	char buffer[256];
+	char aux = 's';
+	printf ("\nQuiere ingresar una linea? S/N: ");
+	scanf("%c", aux);
+	while (aux != 'n' && aux != 'N'){
+		
+		if(aux == 'n' || aux == 'N')
+			break;
+		printf("\nIngrese una linea para hashear: ");
+		scanf ("%s", buffer);
+		(*lines) = realloc(lines, sizeof(char*)*((*cant_lineas)+1));
+		strcpy((*lines)[(*cant_lineas)], buffer);
+		(*cant_lineas)++;
+		printf ("\nQuiere ingresar una linea mas? S/N: ");
+		scanf("%c", aux);
+	}
+}
+
+void salida_std(char** lines, int cant_lineas, int32_t* hashes){
+	printf("\n\nRESULTADO DEL HASHING (FORMATO: LINEA HASH\n------------------------------------------------\n");
+	for (int i=0; i<cant_lineas; i++){
+		printf("Linea %i: %s 0x%08x\n",i, lines[i],hashes[i])
+	}
+}
+
+
 void parseAnswer(int argc, const char** argv) {
 	int option;
 	int cIndex = 0;
 	int32_t* hashes = NULL;
 	char** lines = NULL;
 	int cant_lineas = 0;
+	bool hubo_help_o_v = false;
+	bool hubo_input = false;
+	bool hubo_output = false;
 
 	static struct option long_answer[] = {
 		{"version", no_argument,       NULL, 'V'},
@@ -119,7 +150,7 @@ void parseAnswer(int argc, const char** argv) {
 		{"input",   required_argument, NULL, 'i'},
 		{"output",  required_argument, NULL, 'o'},
 	};
-	
+
 	while ((option = getopt_long(argc, (char**)argv, "Vhi:o:",long_answer ,&cIndex)) != -1){
 
 		if (option == -1)
@@ -146,8 +177,22 @@ void parseAnswer(int argc, const char** argv) {
 				break;
 
 			default:
-				printf("Comando invalido. Pruebe utilizando tp1 -h.");
-				abort();
+				if((!hubo_help_o_v) && (!hubo_input || !hubo_output)){
+					if(!hubo_input){
+						std_input(&lines, &cant_lineas);
+						hashes = malloc(sizeof(int32_t*)*(size_t)(cant_lineas));
+						for (int i=0; i<cant_lineas;i++){
+							hashes[i]=get_hash((*lines)[i]);
+						}
+					}
+					if(!hubo_output){
+						salida_std(lines, cant_lineas);
+					}
+					destruir_lineas(lines, cant_lineas);
+					destruir_hashes(hashes);
+				}
+				break;
+				
 		}
 	}
 }
