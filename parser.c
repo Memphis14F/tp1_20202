@@ -119,7 +119,7 @@ void std_input(char*** lines, int* cant_lineas){
 			break;
 		printf("\nIngrese una linea para hashear: ");
 		scanf ("%s", buffer);
-		(*lines) = realloc(lines, sizeof(char*)*((*cant_lineas)+1));
+		(*lines) = realloc((*lines), sizeof(char*)*((*cant_lineas)+1));
 		strcpy((*lines)[(*cant_lineas)], buffer);
 		(*cant_lineas)++;
 		printf ("\nQuiere ingresar una linea mas? S/N: ");
@@ -128,7 +128,7 @@ void std_input(char*** lines, int* cant_lineas){
 }
 
 void salida_std(char** lines, int cant_lineas, int32_t* hashes){
-	printf("\n\nRESULTADO DEL HASHING (FORMATO: LINEA HASH\n------------------------------------------------\n");
+	printf("\n\nRESULTADO DEL HASHING (FORMATO-> Linea N°: LINEA HASH)\n------------------------------------------------\n");
 	for (int i=0; i<cant_lineas; i++){
 		printf("Linea %i: %s 0x%08x\n",i, lines[i],hashes[i]);
 	}
