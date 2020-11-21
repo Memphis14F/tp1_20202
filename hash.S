@@ -41,20 +41,20 @@ error_string: .asciiz "Assert error.\n"
 .align 2 
 
 string_hash_more:
-	.frame fp, 32, ra
+	.frame fp, 16, ra
 	.set noreorder
 	.cpload t9
 	.set reorder
 
-	subu	sp, sp, 32	# Movemos el Stack Pointer en 32 bytes hacia abajo (Crece)
-	sw		fp, 16(sp)	# Guardamos el frame pointer en sp+16
-	sw		ra, 20(sp)	# Guardamos el return adress en sp+20
-	sw		gp, 24(sp)	# Guardamos el global pointer en sp+24
+	subu	sp, sp, 16	# Movemos el Stack Pointer en 16 bytes hacia abajo (Crece)
+	sw		fp, 0(sp)	# Guardamos el frame pointer en sp
+	sw		ra, 4(sp)	# Guardamos el return adress en sp+4
+	sw		gp, 8(sp)	# Guardamos el global pointer en sp+8
 	move	fp, sp		# Movemos el frame pointer a donde apunta el stack pointer
 
-	sw		a2, 8(sp)	# Almacenamos a2 en sp+8
-	sw		a1, 4(sp)	# Almacenamos a1 en sp+4
-	sw		a0, 0(sp)	# Almacenamos a0 en sp+0
+	sw		a2, 24(sp)	# Almacenamos a2 en sp+24
+	sw		a1, 20(sp)	# Almacenamos a1 en sp+20
+	sw		a0, 16(sp)	# Almacenamos a0 en sp+16
 
 	# Fin del stack
 
@@ -62,7 +62,7 @@ string_hash_more:
 	move t1, a1	# Cargamos *str a t1
 	move t2, a2	# Cargamos len  a t2
 
-	lb t3, 0(t0) 	# Cargamos en t3 el byte de t2; es decir, el primer campo de sh. (h->flag)
+	lb t3, 0(t0) 	# Cargamos en t3 el byte de t0; es decir, el primer campo de sh. (h->flag)
 	lw t4, 4(t0) 	# Cargamos en t4 el segundo campo del sh. (h->hash)
 	lw t5, 8(t0) 	# Cargamos en t5 el tercer campo del sh. (h->size)
 
@@ -91,16 +91,16 @@ post_assertion:
 		li t7, 1000003				# Cargo el inmediato en t7 para poder multiplicar.
 		mul t7, t7, t4				# t7 = hash * HASH_NUMBER
 		xor t7, t7, t6				# t7 = t7 XOR *str
-		addiu t1, t1, 1 # ver esto.  puntero, puntero str (Sumamos 1 al *str)
+		addiu t1, t1, 1 			# puntero, puntero str (Sumamos 1 al *str)
 		move t4, t7 				# Guardamos t7 en t4 (Nuevo valor del hash en t4).
 		sw t4, 4(t0)				# Guardamos el hash en el registro de C.
 
 		
 
-		addiu t5, t5, 1 # sh->size++
-		sw t5, 8(t0) 	# Guardamos el size en el registro de C.
+		addiu t5, t5, 1 			# sh->size++
+		sw t5, 8(t0) 				# Guardamos el size en el registro de C.
 
-		b while # Retornamos al bucle
+		b while 					# Retornamos al bucle
 
 
 
@@ -118,10 +118,10 @@ post_assertion:
 			syscall						# Ejecutar Sys Exit.
 
 		end:
-			lw		fp, 16(sp)	# Cargamos el anterior frame pointer en el frame pointer
-			lw		ra, 20(sp)	# Cargamos el return adress anterior al return adress
-			lw		gp, 24(sp)	# Cargamos el global pointer anterior 
-			add     sp, sp, 32	# Corremos el stack pointer en 32 bytes positivos
+			lw		fp, 0(sp)	# Cargamos el anterior frame pointer en el frame pointer
+			lw		ra, 4(sp)	# Cargamos el return adress anterior al return adress
+			lw		gp, 8(sp)	# Cargamos el global pointer anterior 
+			add     sp, sp, 16	# Corremos el stack pointer en 16 bytes positivos
 			jr ra				# Jump and link al return adress
 
 .end string_hash_more
