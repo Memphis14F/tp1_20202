@@ -4,30 +4,6 @@
 #include <sys/syscall.h>
 
 
-/*
-STRING_HASH_INIT: .equ 1
-STRING_HASH_MORE: .equ 2
-STRING_HASH_DONE: .equ 3
-HASH_NUMBER EQU: .equ 1000003
-*/
-
-# FORMA DE DISTRIBUCION DEL STACK FraME
-#	28	  padding
-# 	24	  gp
-#	20 	  ra
-#	16	  fp	
-# sra
-
-#	12	  padding
-#	8	  a2		len 
-#	4	  a1 		*str
-# 	0 	  a0 		*sh
-# aba
-
-
-
-
-# .rdata
 .abicalls
 
 .align 2 
@@ -46,15 +22,14 @@ string_hash_more:
 	.cpload t9
 	.set reorder
 
-	subu	sp, sp, 16	# Movemos el Stack Pointer en 16 bytes hacia abajo (Crece)
+	subu	sp, sp, 8	# Movemos el Stack Pointer en 8 bytes hacia abajo (Crece)
 	sw		fp, 0(sp)	# Guardamos el frame pointer en sp
-	sw		ra, 4(sp)	# Guardamos el return adress en sp+4
-	sw		gp, 8(sp)	# Guardamos el global pointer en sp+8
+	sw		gp, 4(sp)	# Guardamos el global pointer en sp+4
 	move	fp, sp		# Movemos el frame pointer a donde apunta el stack pointer
 
-	sw		a2, 24(sp)	# Almacenamos a2 en sp+24
-	sw		a1, 20(sp)	# Almacenamos a1 en sp+20
-	sw		a0, 16(sp)	# Almacenamos a0 en sp+16
+	sw		a2, 16(sp)	# Almacenamos a2 en sp+16
+	sw		a1, 12(sp)	# Almacenamos a1 en sp+12
+	sw		a0, 8(sp)	# Almacenamos a0 en sp+8
 
 	# Fin del stack
 
