@@ -108,17 +108,22 @@ void output_hash(const char* output_file, char **lines, int cant_lineas, int32_t
 }
 
 
-void std_input(char*** lines, int* cant_lineas){
+void std_input(char*** lines, int* cant_lineas, bool hay_std_output){
 	char* buffer = NULL;
 	size_t buffer_size = 0;
 	int leido = getline(&buffer, &buffer_size, stdin);
 	while (leido != EOF){
 		(*lines)=realloc((*lines), sizeof(char*)*(*cant_lineas+1));
-		(*lines)[(*cant_lineas)] = malloc(buffer_size);
-		sprintf((*lines)[(*cant_lineas)], buffer);
-		(*cant_lineas)++;
+		if (!hay_std_output){
+			(*lines)[(*cant_lineas)] = malloc(buffer_size);
+			sprintf((*lines)[(*cant_lineas)], buffer);
+			(*cant_lineas)++;
+		}
+		else{
+			int hash = get_hash(buffer);
+			printf ("%s 0x%08x\n", buffer, hash);
+		}
 		leido = getline(&buffer, &buffer_size, stdin);
-		
 	}
 	free(buffer);
 }
@@ -170,7 +175,7 @@ void parseAnswer(int argc, const char** argv) {
 			case 'o':
 				hubo_output=true;
 				if (!hubo_input){
-					std_input(&lines, &cant_lineas);
+					std_input(&lines, &cant_lineas, false);
 					hashes = malloc(sizeof(int32_t)*(size_t)cant_lineas);
 					for (int i=0; i<cant_lineas;i++){
 						hashes[i]=get_hash(lines[i]);
@@ -188,17 +193,12 @@ void parseAnswer(int argc, const char** argv) {
 		}
 	}
 	if((!hubo_input && !hubo_output)){
-		std_input(&lines, &cant_lineas);
-		hashes = malloc(sizeof(int32_t)*(size_t)cant_lineas);
-		for (int i=0; i<cant_lineas;i++){
-			hashes[i]=get_hash(lines[i]);
-		}
-		salida_std(lines, cant_lineas, hashes);
-		destruir_lineas(lines, cant_lineas);
-		destruir_hashes(hashes);
+		std_input(&lines, &cant_lineas, true);
 	}
 	if(hubo_input && !hubo_output){
 		salida_std(lines, cant_lineas, hashes);
+		destruir_lineas(lines, cant_lineas);
+		destruir_hashes(hashes);
 	}
 }
 
