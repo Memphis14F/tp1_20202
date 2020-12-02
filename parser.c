@@ -109,27 +109,18 @@ void output_hash(const char* output_file, char **lines, int cant_lineas, int32_t
 
 
 void std_input(char*** lines, int* cant_lineas){
-	char buffer[500];
-	char aux = 's';
-	char line_end;
-	printf ("\nQuiere ingresar una linea? S/N: ");
-	scanf(" %c", &aux);
-	while (aux != 'n' && aux != 'N'){
-		
-		if(aux == 'n' || aux == 'N')
-			break;
-		printf("\nIngrese una linea para hashear: ");
-		scanf (" %[^\n]%c", buffer, &line_end);
-		strcat(buffer, &line_end);
-		(*lines) = realloc((*lines), sizeof(char*)*((*cant_lineas)+1));
-		size_t len = strlen(buffer);
-		(*lines)[(*cant_lineas)]=malloc(sizeof(char)*len);
-		//strcpy((*lines)[(*cant_lineas)], buffer);
+	char* buffer = NULL;
+	size_t buffer_size = 0;
+	int leido = getline(&buffer, &buffer_size, stdin);
+	while (leido != EOF){
+		(*lines)=realloc((*lines), sizeof(char*)*(*cant_lineas+1));
+		(*lines)[(*cant_lineas)] = malloc(buffer_size);
 		sprintf((*lines)[(*cant_lineas)], buffer);
 		(*cant_lineas)++;
-		printf ("\nQuiere ingresar una linea mas? S/N: ");
-		scanf(" %c", &aux);
+		leido = getline(&buffer, &buffer_size, stdin);
+		
 	}
+	free(buffer);
 }
 
 void salida_std(char** lines, int cant_lineas, int32_t* hashes){
@@ -177,9 +168,10 @@ void parseAnswer(int argc, const char** argv) {
 				break;
 
 			case 'o':
+				hubo_output=true;
 				if (!hubo_input){
 					std_input(&lines, &cant_lineas);
-					hashes = malloc(sizeof(int32_t*)*(size_t)(cant_lineas));
+					hashes = malloc(sizeof(int32_t)*(size_t)cant_lineas);
 					for (int i=0; i<cant_lineas;i++){
 						hashes[i]=get_hash(lines[i]);
 					}
@@ -187,7 +179,6 @@ void parseAnswer(int argc, const char** argv) {
 				output_hash(optarg, lines, cant_lineas, hashes);
 				destruir_lineas(lines, cant_lineas);
 				destruir_hashes(hashes);
-				hubo_output=true;
 				break;
 
 			default:
@@ -198,7 +189,7 @@ void parseAnswer(int argc, const char** argv) {
 	}
 	if((!hubo_input && !hubo_output)){
 		std_input(&lines, &cant_lineas);
-		hashes = malloc(sizeof(int32_t*)*(size_t)(cant_lineas));
+		hashes = malloc(sizeof(int32_t)*(size_t)cant_lineas);
 		for (int i=0; i<cant_lineas;i++){
 			hashes[i]=get_hash(lines[i]);
 		}
@@ -206,10 +197,8 @@ void parseAnswer(int argc, const char** argv) {
 		destruir_lineas(lines, cant_lineas);
 		destruir_hashes(hashes);
 	}
-	else if(!hubo_output){
+	if(hubo_input && !hubo_output){
 		salida_std(lines, cant_lineas, hashes);
-		destruir_lineas(lines, cant_lineas);
-		destruir_hashes(hashes);
 	}
 }
 
