@@ -95,7 +95,7 @@ post_assertion:
 		end:
 			lw		fp, 0(sp)	# Cargamos el anterior frame pointer en el frame pointer
 			lw		gp, 4(sp)	# Cargamos el global pointer anterior 
-			add     sp, sp, 8	# Corremos el stack pointer en 16 bytes positivos
+			add     sp, sp, 8	# Corremos el stack pointer en 8 bytes positivos
 			jr ra				# Jump and link al return adress
 
 .end string_hash_more
