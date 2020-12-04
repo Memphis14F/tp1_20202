@@ -164,14 +164,7 @@ void parseAnswer(int argc, const char** argv) {
 				hubo_output=true;
 				if (!hubo_input){
 					std_input(&lines, &cant_lineas, false, optarg);
-					/*hashes = malloc(sizeof(int32_t)*(size_t)cant_lineas);
-					for (int i=0; i<cant_lineas;i++){
-						hashes[i]=get_hash(lines[i]);
-					}*/
 				}
-				/*output_hash(optarg, lines, cant_lineas, hashes);
-				destruir_lineas(lines, cant_lineas);
-				destruir_hashes(hashes);*/
 				break;
 
 			default:
