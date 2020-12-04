@@ -89,6 +89,25 @@ void hash_input(char* input_file, char ***lines, int* cant_lineas, int32_t**hash
 	}
 }
 
+void output_hash(const char* output_file, char **lines, int cant_lineas, int32_t* hashes){
+	FILE *fp = fopen(output_file, "w");
+    if(fp == NULL) {
+        perror("No se pudo leer el archivo. Imprimiendo el resultado por consola.");
+		for(int i=0; i < cant_lineas; i++){
+			printf ("0x%08x %s", hashes[i], lines[i]);
+		}
+		return;
+	}
+	else{
+		for(int i=0; i < cant_lineas; i++){
+			char mensaje [500];
+			sprintf (mensaje, "0x%08x %s", hashes[i], lines[i]);
+			fprintf(fp, mensaje);
+		}
+	}
+}
+
+
 
 void std_input(char*** lines, int* cant_lineas, bool hay_std_output, char* path_file){
 	char* buffer = NULL;
@@ -164,6 +183,11 @@ void parseAnswer(int argc, const char** argv) {
 				hubo_output=true;
 				if (!hubo_input){
 					std_input(&lines, &cant_lineas, false, optarg);
+				}
+				else{
+					output_hash(optarg, lines, cant_lineas, hashes);
+					destruir_lineas(lines, cant_lineas);
+					destruir_hashes(hashes);
 				}
 				break;
 

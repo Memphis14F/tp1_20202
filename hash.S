@@ -17,7 +17,7 @@ error_string: .asciiz "Assert error.\n"
 .align 2 
 
 string_hash_more:
-	.frame fp, 16, ra
+	.frame fp, 8, ra
 	.set noreorder
 	.cpload t9
 	.set reorder
