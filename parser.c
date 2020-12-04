@@ -89,42 +89,30 @@ void hash_input(char* input_file, char ***lines, int* cant_lineas, int32_t**hash
 	}
 }
 
-void output_hash(const char* output_file, char **lines, int cant_lineas, int32_t* hashes){
-	FILE *fp = fopen(output_file, "w");
-    if(fp == NULL) {
-        perror("No se pudo leer el archivo. Imprimiendo el resultado por consola.");
-		for(int i=0; i < cant_lineas; i++){
-			printf ("0x%08x %s", hashes[i], lines[i]);
-		}
-		return;
-	}
-	else{
-		for(int i=0; i < cant_lineas; i++){
-			char mensaje [500];
-			sprintf (mensaje, "0x%08x %s", hashes[i], lines[i]);
-			fprintf(fp, mensaje);
-		}
-	}
-}
 
-
-void std_input(char*** lines, int* cant_lineas, bool hay_std_output){
+void std_input(char*** lines, int* cant_lineas, bool hay_std_output, char* path_file){
 	char* buffer = NULL;
 	size_t buffer_size = 0;
 	int leido = getline(&buffer, &buffer_size, stdin);
+	FILE* fp = NULL;
+	if(!hay_std_output){
+		fp = fopen(path_file, "w");
+		if(fp == NULL){
+        	perror("No se pudo leer el archivo. Imprimiendo el resultado por consola.");
+			hay_std_output = true;
+		}
+	}
 	while (leido != EOF){
 		(*lines)=realloc((*lines), sizeof(char*)*(*cant_lineas+1));
-		if (!hay_std_output){
-			(*lines)[(*cant_lineas)] = malloc(buffer_size);
-			sprintf((*lines)[(*cant_lineas)], buffer);
-			(*cant_lineas)++;
-		}
-		else{
-			int hash = get_hash(buffer);
+		int hash = get_hash(buffer);
+		if (!hay_std_output)
+			fprintf(fp, "%s 0x%08x\n", buffer, hash);
+		else
 			printf ("%s 0x%08x\n", buffer, hash);
-		}
 		leido = getline(&buffer, &buffer_size, stdin);
 	}
+	if(!hay_std_output)
+		fclose(fp);
 	free(buffer);
 }
 
@@ -175,15 +163,15 @@ void parseAnswer(int argc, const char** argv) {
 			case 'o':
 				hubo_output=true;
 				if (!hubo_input){
-					std_input(&lines, &cant_lineas, false);
-					hashes = malloc(sizeof(int32_t)*(size_t)cant_lineas);
+					std_input(&lines, &cant_lineas, false, optarg);
+					/*hashes = malloc(sizeof(int32_t)*(size_t)cant_lineas);
 					for (int i=0; i<cant_lineas;i++){
 						hashes[i]=get_hash(lines[i]);
-					}
+					}*/
 				}
-				output_hash(optarg, lines, cant_lineas, hashes);
+				/*output_hash(optarg, lines, cant_lineas, hashes);
 				destruir_lineas(lines, cant_lineas);
-				destruir_hashes(hashes);
+				destruir_hashes(hashes);*/
 				break;
 
 			default:
@@ -193,7 +181,7 @@ void parseAnswer(int argc, const char** argv) {
 		}
 	}
 	if((!hubo_input && !hubo_output)){
-		std_input(&lines, &cant_lineas, true);
+		std_input(&lines, &cant_lineas, true, NULL);
 	}
 	if(hubo_input && !hubo_output){
 		salida_std(lines, cant_lineas, hashes);
